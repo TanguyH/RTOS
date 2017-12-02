@@ -1,86 +1,59 @@
 import sys
 from task import Task
 from taskset import TaskSet
+from InputVerifier import InputVerifier
 
-def FIValidity(arguments):
-    if(not arguments[1] == "interval"):
-        return "EF1"                                                            # error : interval argument
-    elif(not arguments[2][-4:] == ".txt"):
-        return "EF2"                                                            # error : file .txt argument
-    return "FI"
 
-def SimValidity(arguments):
-    if not(arguments[2].isnumeric() and arguments[3].isnumeric()) or (arguments[2] > arguments[3]):
-        return "ES1"
-    if(arguments[4][-4:] == ".txt"):
-        return "ES2"
-    return "SIM"
-
-def AudlseyValidity(arguments):
-    if not(arguments[2].isnumeric() and arguments[3].isnumeric()) or (arguments[2] > arguments[3]):
-        return "EA1"
-    if(arguments[4][-4:] == ".txt"):
-        return "EA2"
-    return "AUDSLEY"
-
-def GeneratorValidity(arguments):
-    if not(arguments[2].isnumeric() and arguments[3].isnumeric()) or (arguments[2] > arguments[3]):
-        return "EG1"
-    if(arguments[4][-4:] == ".txt"):
-        return "EG2"
-    return "GEN"
-
-def verifyCommandLineValidity(arguments):
+def retrieveTaskSet(source_file):
     """
-    Function designed to verify validity of arguments, and stop execution if not valid
+    Method who will analyze a given .txt file to get all information about the task set
     """
-    if(len(arguments) == 3):
-        return FIValidity(arguments)
-
-    elif(len(arguments) == 5):
-        if(arguments[1] == "sim"):
-            return SimValidity(arguments)
-        elif(arguments[1] == "audsley"):
-            return AudlseyValidity(arguments)
-        elif(arguments[1] == "gen"):
-            return GeneratorValidity(arguments)
-        else:
-            return "CNF"                                                        # command not found
-    else:
-        return "INOA"                                                           # invalid number of arguments
-
-
-
-
-if __name__ == "__main__":
-    #
-    #   argument verification
-    #
-    arguments = list(sys.argv)
-    case = verifyCommandLineValidity(arguments)
-
-    #if(verif.getAction()[0] != "E" and request == "interval")
-
-    #
-    #   argument retrieval
-    #
-    request = arguments[1]
-    source_file = arguments[2]
-    print("interval : " + request)
-    print("source : " + source_file)
-
-
-    #
-    #   task & taskset extraction
-    #
     source_file = open(source_file, "r")
     taskset = TaskSet()
     for line in source_file:
         offset, period, deadline, WCET = line.split(" ")
         task = Task(int(offset), int(period), int(deadline), int(WCET))
         taskset.addTask(task)
+    return taskset
 
+def FIAction(source_file):
+    taskset = retrieveTaskSet(source_file)
     fi = taskset.findFeasibilityInterval()
     print(fi)
 
-    
+def SIMAction(source_file):
+    taskset = retrieveTaskSet(source_file)
+
+def AUDSLEYAction(source_file):
+    taskset = retrieveTaskSet(source_file)
+
+def GENAction(source_file):
+    taskset = retrieveTaskSet(source_file)
+
+
+if __name__ == "__main__":
+
+    arguments = list(sys.argv)
+    inputCheck = InputVerifier(arguments)
+    if (inputCheck.getError()):
+        print(inputCheck.getError()+" --- "+inputCheck.getErrorPhrase())
+    else:
+
+        action = inputCheck.getAction()
+        if (action == "FI"):
+            source_file = arguments[2]
+            print("source : " + source_file)
+            FIAction(source_file)
+        elif (action == "SIM"):
+            source_file = arguments[4]
+            print ("action : SIM")
+            SIMAction(source_file)
+        elif (action == "AUDSLEY"):
+            source_file = arguments[4]
+            print("action : AUDSLEY")
+            AUDSLEYAction(source_file)
+        elif (action == "GEN"):
+            source_file = arguments[4]
+            print("action : GEN")
+            GENAction(source_file)
+
