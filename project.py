@@ -3,32 +3,31 @@ from task import Task
 from taskset import TaskSet
 from InputVerifier import InputVerifier
 
-
-def retrieveTaskSet(source_file):
-    """
-    Method who will analyze a given .txt file to get all information about the task set
-    """
-    source_file = open(source_file, "r")
-    taskset = TaskSet()
-    for line in source_file:
-        offset, period, deadline, WCET = line.split(" ")
-        task = Task(int(offset), int(period), int(deadline), int(WCET))
-        taskset.addTask(task)
-    return taskset
+# not sure if working
+def lowestPriorityViable(taskset, begin, end, task_number):
+    taskset.buildSystem(begin, end, task_number)
+    task_misses = taskset.checkForMisses(task_number)
+    return not task_misses
 
 def FIAction(source_file):
-    taskset = retrieveTaskSet(source_file)
+    taskset = TaskSet(source_file)
     fi = taskset.findFeasibilityInterval()
     print(fi)
 
-def SIMAction(source_file):
-    taskset = retrieveTaskSet(source_file)
+def SIMAction(source_file, start, end):
+    taskset = TaskSet(source_file)
+    taskset.simulate(start, end)
 
-def AUDSLEYAction(source_file):
-    taskset = retrieveTaskSet(source_file)
+# not done ..
+def AUDSLEYAction(source_file, start, end):
+    taskset = TaskSet(source_file)
+
+    for task in taskset.getTaskSet():
+        viable = lowestPriorityViable(taskset, int(start), int(end), task.getTaskNumber())
+        print(viable)
 
 def GENAction(source_file):
-    taskset = retrieveTaskSet(source_file)
+    taskset = TaskSet(source_file)
 
 
 if __name__ == "__main__":
@@ -36,24 +35,24 @@ if __name__ == "__main__":
     arguments = list(sys.argv)
     inputCheck = InputVerifier(arguments)
     if (inputCheck.getError()):
-        print(inputCheck.getError()+" --- "+inputCheck.getErrorPhrase())
+        print(inputCheck.getError() + " --- " + inputCheck.getErrorPhrase())
     else:
 
         action = inputCheck.getAction()
         if (action == "FI"):
             source_file = arguments[2]
-            print("source : " + source_file)
             FIAction(source_file)
         elif (action == "SIM"):
+            start = arguments[2]
+            end = arguments[3]
             source_file = arguments[4]
-            print ("action : SIM")
-            SIMAction(source_file)
+            SIMAction(source_file, start, end)
         elif (action == "AUDSLEY"):
+            start = arguments[2]
+            end = arguments[3]
             source_file = arguments[4]
-            print("action : AUDSLEY")
-            AUDSLEYAction(source_file)
+            AUDSLEYAction(source_file, start, end)
         elif (action == "GEN"):
             source_file = arguments[4]
             print("action : GEN")
             GENAction(source_file)
-
