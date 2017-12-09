@@ -1,6 +1,7 @@
 import sys
 from task import Task
 from taskset import TaskSet
+from schedule import Schedule
 from InputVerifier import InputVerifier
 
 # not sure if working
@@ -16,7 +17,8 @@ def FIAction(source_file):
 
 def SIMAction(source_file, start, end):
     taskset = TaskSet(source_file)
-    taskset.simulate(start, end)
+    schedule = Schedule(taskset)
+    schedule.simulate(start, end)
 
 # not done ..
 def AUDSLEYAction(source_file, start, end):
