@@ -25,6 +25,9 @@ class Task:
     def getJobRelease(self):
         return self._job_release
 
+    def clearJobRealease(self):
+        self._job_release = 0
+
     def releaseJob(self, time):
         self._job_release += 1
         return [self.getTaskNumber(), self.getJobRelease()]

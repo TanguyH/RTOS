@@ -6,8 +6,9 @@ from InputVerifier import InputVerifier
 
 # not sure if working
 def lowestPriorityViable(taskset, begin, end, task_number):
-    taskset.buildSystem(begin, end, task_number)
-    task_misses = taskset.checkForMisses(task_number)
+    schedule = Schedule(taskset)
+    schedule.buildSystem(begin, end, task_number)
+    task_misses = schedule.checkForMisses(task_number)
     return not task_misses
 
 def FIAction(source_file):
@@ -24,9 +25,12 @@ def SIMAction(source_file, start, end):
 def AUDSLEYAction(source_file, start, end):
     taskset = TaskSet(source_file)
 
-    for task in taskset.getTaskSet():
+    for task in taskset.getTasks():
         viable = lowestPriorityViable(taskset, int(start), int(end), task.getTaskNumber())
-        print(viable)
+        print("Task " + str(task.getTaskNumber()) + " is", end=" ")
+        if(not viable):
+            print("not", end=" ")
+        print("lowest priority viable")
 
 def GENAction(source_file):
     taskset = TaskSet(source_file)
