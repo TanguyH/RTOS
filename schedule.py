@@ -6,6 +6,8 @@ class Schedule:
         self._arrivals = []
         self._deadlines = []
         self._misses = []
+        self._deadline_type = "soft"
+
         self._schedule = []
         self._schedule_block = 0
         self._schedule_queue = []
@@ -30,6 +32,15 @@ class Schedule:
 
     def getTaskSetPeriods(self):
         return self.getTaskSet().getTasksPeriods()
+
+    def getDeadlineType(self):
+        return self._deadline_type
+
+    def setHardDeadlines(self):
+        self._deadline_type = "hard"
+
+    def setSoftDeadlines(self):
+        self._deadline_type = "soft"
 
     def getSchedule(self, i = None):
         if(i != None):
@@ -94,7 +105,8 @@ class Schedule:
 
         if(blocks_to_fit > 0):
             self.flagDeadlineMiss(block, [task.getTaskNumber(), job])
-            # reschedule task for later ? -> yes if deadlines SOFT !!
+            if(self.getDeadlineType() == "soft"):
+                self.scheduleTask(task, job, time + self.getScheduleBlockSize())
 
     def assignTasksToSlots(self, lowest_priority=None):
         # sort by priority
