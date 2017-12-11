@@ -18,6 +18,9 @@ class Schedule:
     def getTasksFromTaskset(self):
         return self.getTaskSet().getTasks()
 
+    def getTasksFromOriginalTaskset(self):
+        return self.getTaskSet().getOriginalTasks()
+
     def setTaskSet(self, task_set):
         self._task_set = task_set
 
@@ -128,12 +131,10 @@ class Schedule:
 
                 if(blocks_to_fit == -1):
                     done = True
-
         #--^
-
         return blocks_to_fit
 
-    def assignTasksToSlots(self, lowest_priority=None):
+    def assignTasksToSlots(self, lowest_priority=None, established_lowest=[]):
         # sort by priority
         priorities = {}
         for task_time in self._schedule_queue:
@@ -149,13 +150,24 @@ class Schedule:
                 for task_time in priorities[priority]:
                     self.scheduleTask(task_time[0], task_time[1], task_time[2])
 
-        # priority = schedule others first, then prior
         else:
+            # schedule all except lowest and established_lowest
             for priority in priorities.keys():
-                if priority != lowest_priority:
+                if priority != lowest_priority and priority not in established_lowest:  # MOD after and
                     for task_time in priorities[priority]:
                         self.scheduleTask(task_time[0], task_time[1], task_time[2])
 
+            # code = good, but tasks not in system
+            #----------------------------------------------------------------------------------
+            # schedule established_lowest                                               # added
+            if(established_lowest):
+                established_lowest = established_lowest[::-1]
+                for i in range(0, len(established_lowest)):
+                    for task_time in priorities[established_lowest[i]]:
+                        self.scheduleTask(task_time[0], task_time[1], task_time[2])
+            #^---------------------------------------------------------------------------------
+
+            # schedule lowest
             if(lowest_priority in priorities.keys()):
                 for task_time in priorities[lowest_priority]:
                     self.scheduleTask(task_time[0], task_time[1], task_time[2])
@@ -166,27 +178,28 @@ class Schedule:
             self.setDeadline(block, task_job)
 
     def checkForTaskRelease(self, time):
-        for task in self.getTasksFromTaskset():
+        for task in self.getTasksFromOriginalTaskset():                  # original taskset ?
             if(time % task.getPeriod() == 0):                    # 0 was task.getOffset()
                 task_job = task.releaseJob(time)
                 self.scheduleRelease(task_job, time)
                 self._schedule_queue.append((task, task_job[1], time))
 
     def checkForTaskDeadline(self, time):
-        for task in self.getTasksFromTaskset():
+        for task in self.getTasksFromOriginalTaskset():
             if(time % task.getDeadline() == 0):                                 # 0 was task.getOffset()
                 task_job = task.endCurrentJob(time)
                 self.scheduleDealine(task_job, time)
 
     def defineScheduleSpace(self, start, end, min_job_run):
-        self._schedule = [[None,None] for i in range((end-start)//min_job_run)]
-        self._arrivals = [[] for i in range((end-start)//min_job_run)]
-        self._deadlines = [[] for i in range((end-start)//min_job_run + 1)]     # deadlines require more space
-        self._misses = [[] for i in range((end-start)//min_job_run)]
-        self._schedule_block = min_job_run
-        self.clearTaskInformations()
+        if(min_job_run > 0):
+            self._schedule = [[None,None] for i in range((end-start)//min_job_run)]
+            self._arrivals = [[] for i in range((end-start)//min_job_run)]
+            self._deadlines = [[] for i in range((end-start)//min_job_run + 1)]     # deadlines require more space
+            self._misses = [[] for i in range((end-start)//min_job_run)]
+            self._schedule_block = min_job_run
+            self.clearTaskInformations()
 
-    def buildSystem(self, start, end, lowest_priority=None):
+    def buildSystem(self, start, end, lowest_priority=None, established_lowest=[]):
         block_check = gcdlist(self.getTaskSetWCET())                       # gcd all task lengths
         deadline_check = gcdlist(self.getTaskSetDeadlines())               # gcd all deadlines
         period_check = gcdlist(self.getTaskSetPeriods())                   # gcd all periods
@@ -194,12 +207,13 @@ class Schedule:
         slot_size = gcdlist([block_check, deadline_check, period_check])   # define slot_size
         self.defineScheduleSpace(start, end, slot_size)
 
-        for time in range(start, end + slot_size, slot_size):
-            if(time > start):
-                self.checkForTaskDeadline(time)
-            if(time != end):
-                self.checkForTaskRelease(time)
-        self.assignTasksToSlots(lowest_priority)
+        if(slot_size > 0):
+            for time in range(start, end + slot_size, slot_size):
+                if(time > start):
+                    self.checkForTaskDeadline(time)
+                if(time != end):
+                    self.checkForTaskRelease(time)
+            self.assignTasksToSlots(lowest_priority, established_lowest)
 
     def simulate(self, start, end, lowest_priority=None):
 

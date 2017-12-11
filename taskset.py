@@ -1,3 +1,4 @@
+from copy import *
 from task import Task
 from functools import reduce
 from additional import *
@@ -5,6 +6,7 @@ from additional import *
 class TaskSet:
     def __init__(self, source_file=None):
         self._tasks = []
+        self._original_tasks = []
         self._arrivals = []
         self._deadlines = []
         self._misses = []
@@ -15,11 +17,22 @@ class TaskSet:
         if(source_file != None):
             self.loadTasks(source_file)
 
-    def getTasks(self):
+    def getTasks(self, i=None):
+        if(i != None):
+            return self._tasks[i]
         return self._tasks
+
+    def getOriginalTasks(self):
+        return self._original_tasks
+
+    def removeTask(self, task):
+        self.getTasks().remove(task)
 
     def setTasks(self, task_set):
         self._tasks = task_set
+
+    def setOriginalTasks(self, o_task_set):
+        self._original_tasks = deepcopy(o_task_set)
 
     def getNumberOfTasks(self):
         return len(self.getTasks())
@@ -58,6 +71,7 @@ class TaskSet:
             taskset.addTask(task)
             task_count += 1
         self.setTasks(taskset.getTasks())
+        self.setOriginalTasks(taskset.getTasks())
 
     def findFeasibilityInterval(self):
         O_max = 0

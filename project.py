@@ -4,10 +4,9 @@ from taskset import TaskSet
 from schedule import Schedule
 from InputVerifier import InputVerifier
 
-# not sure if working
-def lowestPriorityViable(taskset, begin, end, task_number):
+def lowestPriorityViable(taskset, begin, end, task_number, established_priorities=[]):
     schedule = Schedule(taskset)
-    schedule.buildSystem(begin, end, task_number)
+    schedule.buildSystem(begin, end, task_number, established_priorities)
     task_misses = schedule.checkForMisses(task_number)
     return not task_misses
 
@@ -21,16 +20,48 @@ def SIMAction(source_file, start, end):
     schedule = Schedule(taskset)
     schedule.simulate(start, end)
 
-# not done ..
-def AUDSLEYAction(source_file, start, end):
-    taskset = TaskSet(source_file)
+def Audsley(taskset, start, end, low_priorities = []):
+    viability = []
+    feasable = False
+    to_remove = None
 
     for task in taskset.getTasks():
-        viable = lowestPriorityViable(taskset, int(start), int(end), task.getTaskNumber())
+        viable = lowestPriorityViable(taskset, int(start), int(end), task.getTaskNumber(), low_priorities)
+        for i in range(len(low_priorities)):
+            print("\t", end="")
         print("Task " + str(task.getTaskNumber()) + " is", end=" ")
         if(not viable):
             print("not", end=" ")
         print("lowest priority viable")
+        viability.append(viable)
+
+    i = 0
+    while (i < len(viability)) and not feasable:
+        if(viability[i]):
+            feasable = True
+            to_remove = taskset.getTasks(i)
+            low_priorities.append(to_remove.getTaskNumber())
+        i += 1
+
+    if(not feasable):
+        return feasable
+    else:
+        # new TaskSet
+        taskset.removeTask(to_remove)
+        return Audsley(taskset, start, end, low_priorities)
+
+
+
+
+# not done ..
+def AUDSLEYAction(source_file, start, end):
+
+    start_taskset = TaskSet(source_file)
+    viability = Audsley(start_taskset, int(start), int(end))
+
+    #for lowest_priority_viability in viability:
+    #    if(lowest_priority_viability):
+    #        print("next round")
 
 def GENAction(source_file):
     taskset = TaskSet(source_file)
