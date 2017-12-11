@@ -6,7 +6,21 @@ from InputVerifier import InputVerifier
 
 def lowestPriorityViable(taskset, begin, end, task_number, established_priorities=[]):
     schedule = Schedule(taskset)
+
+    print("\nschedule pre-status : ")
+    print(schedule.getSchedule())
+    print(schedule.getRelease())
+    print(schedule.getDeadlines())
+    print()
+
     schedule.buildSystem(begin, end, task_number, established_priorities)
+
+    print("\nschedule post-status : ")
+    print(schedule.getSchedule())
+    print(schedule.getRelease())
+    print(schedule.getDeadlines())
+    print()
+
     task_misses = schedule.checkForMisses(task_number)
     return not task_misses
 
@@ -43,12 +57,12 @@ def Audsley(taskset, start, end, low_priorities = []):
             low_priorities.append(to_remove.getTaskNumber())
         i += 1
 
-    if(not feasable):
-        return feasable
-    else:
+    if feasable:
         # new TaskSet
         taskset.removeTask(to_remove)
         return Audsley(taskset, start, end, low_priorities)
+    else:
+        return False
 
 
 

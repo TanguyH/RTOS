@@ -56,8 +56,10 @@ class Schedule:
     def getScheduleBlockSize(self):
         return self._schedule_block
 
-    def getRelease(self, i):
-        return self._arrivals[i]
+    def getRelease(self, i=None):
+        if(i != None):
+            return self._arrivals[i]
+        return self._arrivals
 
     def setRelease(self, i, task_job):
         self._arrivals[i].append(task_job)
@@ -153,7 +155,7 @@ class Schedule:
         else:
             # schedule all except lowest and established_lowest
             for priority in priorities.keys():
-                if priority != lowest_priority and priority not in established_lowest:  # MOD after and
+                if (priority != lowest_priority) and (priority not in established_lowest):  # MOD after and
                     for task_time in priorities[priority]:
                         self.scheduleTask(task_time[0], task_time[1], task_time[2])
 
@@ -221,6 +223,8 @@ class Schedule:
         start, end = int(start), int(end)
 
         self.buildSystem(start, end, lowest_priority)
+
+        print(self._arrivals)
 
         slot_start, slot_end = 0, 0
         prev_task, prev_job = None, None
