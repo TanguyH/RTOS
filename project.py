@@ -3,6 +3,7 @@ from task import Task
 from taskset import TaskSet
 from schedule import Schedule
 from InputVerifier import InputVerifier
+from generator import Generator
 
 def lowestPriorityViable(taskset, begin, end, task_number, established_priorities=[]):
     schedule = Schedule(taskset)
@@ -77,9 +78,10 @@ def AUDSLEYAction(source_file, start, end):
     #    if(lowest_priority_viability):
     #        print("next round")
 
-def GENAction(source_file):
-    taskset = TaskSet(source_file)
-
+def GENAction(nb_tasks, utilization, output_file):
+    gen = Generator(nb_tasks, utilization, output_file)
+    gen.generateSystem()
+    gen.generateFile()
 
 if __name__ == "__main__":
 
@@ -104,6 +106,8 @@ if __name__ == "__main__":
             source_file = arguments[4]
             AUDSLEYAction(source_file, start, end)
         elif (action == "GEN"):
-            source_file = arguments[4]
+            nb_tasks = arguments[2]
+            utilization = arguments[3]
+            output_file = arguments[4]
             print("action : GEN")
-            GENAction(source_file)
+            GENAction(nb_tasks, utilization, output_file)

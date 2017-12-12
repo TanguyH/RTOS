@@ -1,3 +1,6 @@
+from functools import reduce
+from random import randint
+
 def gcdlist(elements):
     gcd_res = 0
     for i in range(len(elements)-1):
@@ -29,3 +32,8 @@ def lcmArray(args):
     :return: return the least common multiple of all values in args list
     """
     return reduce(lcm, args)
+
+def getRandValue(min_value, top_value):
+    value = randint(min_value,top_value)
+    actual_value = value*10
+    return actual_value
