@@ -185,19 +185,27 @@ class Schedule:
 
     def scheduleDealine(self, task_job, time):
         block = time // self.getScheduleBlockSize()
-        if(block < len(self.getDeadlines())):
+        if(block < len(self.getDeadlines())) and (task_job[1] > 0):
             self.setDeadline(block, task_job)
 
     def checkForTaskRelease(self, time):
         for task in self.getTasksFromTaskset():                                 # -- original taskset ?
-            if(time % task.getPeriod() == 0) and (time >= task.getOffset()):    # 0 was task.getOffset()
+            #if(time % task.getPeriod() == 0): #and (time >= task.getOffset()):    # 0 was task.getOffset()
+            #if(time == task.getOffset()) or (time%task.getPeriod() == task.getOffset() and time > task.getOffset()):
+            if(time == task.getOffset()) or (((time - task.getOffset())%task.getPeriod()) == 0 and time > task.getOffset()):
                 task_job = task.releaseJob(time)
+                #print("time " + str(time) + "T"+str(task_job[0]) + "J" + str(task_job[1]))
+                #print("->" + str(task.getPeriod()) + " | " + str(task.getOffset()))
                 self.scheduleRelease(task_job, time)
                 self._schedule_queue.append((task, task_job[1], time))
 
     def checkForTaskDeadline(self, time):                                       # -- original taskset ?
         for task in self.getTasksFromTaskset():
-            if(time % task.getDeadline() == 0) and (time >= task.getOffset()):                                 # 0 was task.getOffset()
+            #if(time % task.getDeadline() == 0) and (time >= task.getOffset()):  # 0 was task.getOffset()
+            flag = task.getDeadline()
+            if(task.getDeadline() == task.getPeriod()):
+                flag = 0
+            if(time >= task.getOffset()) and (((time - task.getOffset()) % task.getPeriod()) == flag):
                 task_job = task.endCurrentJob(time)
                 self.scheduleDealine(task_job, time)
 
