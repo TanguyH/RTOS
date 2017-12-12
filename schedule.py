@@ -83,7 +83,7 @@ class Schedule:
         self._misses[i].append(task_job)
 
     def clearTaskInformations(self):
-        for task in self.getTasksFromOriginalTaskset():
+        for task in self.getTasksFromTaskset():                                 #------ original ?
             task.clearJobRealease()
 
     # not sure if working
@@ -189,14 +189,14 @@ class Schedule:
             self.setDeadline(block, task_job)
 
     def checkForTaskRelease(self, time):
-        for task in self.getTasksFromOriginalTaskset():                  # original taskset ?
+        for task in self.getTasksFromTaskset():                                 # -- original taskset ?
             if(time % task.getPeriod() == 0) and (time >= task.getOffset()):    # 0 was task.getOffset()
                 task_job = task.releaseJob(time)
                 self.scheduleRelease(task_job, time)
                 self._schedule_queue.append((task, task_job[1], time))
 
-    def checkForTaskDeadline(self, time):
-        for task in self.getTasksFromOriginalTaskset():
+    def checkForTaskDeadline(self, time):                                       # -- original taskset ?
+        for task in self.getTasksFromTaskset():
             if(time % task.getDeadline() == 0) and (time >= task.getOffset()):                                 # 0 was task.getOffset()
                 task_job = task.endCurrentJob(time)
                 self.scheduleDealine(task_job, time)
@@ -232,8 +232,6 @@ class Schedule:
         start, end = int(start), int(end)
 
         self.buildSystem(start, end, lowest_priority)
-
-        print(self._arrivals)
 
         slot_start, slot_end = 0, 0
         prev_task, prev_job = None, None
