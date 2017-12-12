@@ -8,21 +8,22 @@ from generator import Generator
 def lowestPriorityViable(taskset, begin, end, task_number, established_priorities=[]):
     schedule = Schedule(taskset)
 
+
     print("\nschedule pre-status : ")
-    print(schedule.getSchedule())
-    print(schedule.getRelease())
-    print(schedule.getDeadlines())
-    print()
+    print("shed : " + str(schedule.getSchedule()) + "\n")
+    print("releases : " + str(schedule.getRelease()) + "\n")
+    print("deadlines : " + str(schedule.getDeadlines()) + "\n")
+    print("misses : " + str(schedule.getMisses()) + "\n")
 
     schedule.buildSystem(begin, end, task_number, established_priorities)
 
     print("\nschedule post-status : ")
-    print(schedule.getSchedule())
-    print(schedule.getRelease())
-    print(schedule.getDeadlines())
-    print()
+    print("shed : " + str(schedule.getSchedule()) + "\n")
+    print("releases : " + str(schedule.getRelease()) + "\n")
+    print("deadlines : " + str(schedule.getDeadlines()) + "\n")
+    print("misses : " + str(schedule.getMisses()) + "\n")
 
-    task_misses = schedule.checkForMisses(task_number)
+    task_misses = schedule.checkForMisses()
     return not task_misses
 
 def FIAction(source_file):
@@ -32,47 +33,41 @@ def FIAction(source_file):
 
 def SIMAction(source_file, start, end):
     taskset = TaskSet(source_file)
+    for task in taskset.getTasks():
+        print(task.getOffset(), end=" | ")
+        print(task.getPeriod(), end=" | ")
+        print(task.getDeadline(), end=" | ")
+        print(task.getWCET())
     schedule = Schedule(taskset)
     schedule.simulate(start, end)
 
 def Audsley(taskset, start, end, low_priorities = []):
-    viability = []
-    feasable = False
+    #viability = []
+    #feasable = False
     to_remove = None
 
     for task in taskset.getTasks():
         viable = lowestPriorityViable(taskset, int(start), int(end), task.getTaskNumber(), low_priorities)
+
         for i in range(len(low_priorities)):
             print("\t", end="")
         print("Task " + str(task.getTaskNumber()) + " is", end=" ")
+
         if(not viable):
             print("not", end=" ")
         print("lowest priority viable")
-        viability.append(viable)
 
-    i = 0
-    while (i < len(viability)) and not feasable:
-        if(viability[i]):
-            feasable = True
-            to_remove = taskset.getTasks(i)
-            low_priorities.append(to_remove.getTaskNumber())
-        i += 1
-
-    if feasable:
-        # new TaskSet
-        taskset.removeTask(to_remove)
-        return Audsley(taskset, start, end, low_priorities)
-    else:
-        return False
-
-
-
+        if(viable):
+            # Audsley
+            low_priorities.append(task.getTaskNumber())
+            taskset.removeTask(task)
+            Audsley(taskset, start, end, low_priorities)
 
 # not done ..
 def AUDSLEYAction(source_file, start, end):
 
     start_taskset = TaskSet(source_file)
-    viability = Audsley(start_taskset, int(start), int(end))
+    Audsley(start_taskset, int(start), int(end))
 
     #for lowest_priority_viability in viability:
     #    if(lowest_priority_viability):
