@@ -6,12 +6,6 @@ from additional import *
 class TaskSet:
     def __init__(self, source_file=None):
         self._tasks = []
-        self._arrivals = []
-        self._deadlines = []
-        self._misses = []
-        self._schedule = []
-        self._schedule_block = 0
-        self._schedule_queue = []
 
         if(source_file != None):
             self.loadTasks(source_file)
