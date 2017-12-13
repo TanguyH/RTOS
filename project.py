@@ -34,6 +34,7 @@ def SIMAction(source_file, start, end):
     taskset = TaskSet(source_file)
     schedule = Schedule(taskset)
     schedule.simulate(start, end)
+    
 
 def Audsley(taskset, start, end, low_priorities = []):
     viability = []
@@ -82,6 +83,7 @@ def GENAction(nb_tasks, utilization, output_file):
     gen = Generator(nb_tasks, utilization, output_file)
     gen.generateSystem()
     gen.generateFile()
+
 
 if __name__ == "__main__":
 

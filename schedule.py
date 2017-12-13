@@ -7,6 +7,7 @@ class Schedule:
         self._deadlines = []
         self._misses = []
         self._deadline_type = "soft"
+        self._slots= []         #contains [slot_start TnJm, slot_end TnJm], ..
 
         self._schedule = []
         self._schedule_block = 0
@@ -69,6 +70,9 @@ class Schedule:
 
     def getDeadlines(self):
         return self._deadlines
+
+    def getSlots(self):
+        return self._slots
 
     def setDeadline(self, i, task_job):
         self._deadlines[i].append(task_job)
@@ -274,7 +278,7 @@ class Schedule:
                     # case : end task or job
                     if(next_task != current_task or next_job != current_job):
                         print(str(slot_start * self.getScheduleBlockSize()) + "-" + str(slot_end * self.getScheduleBlockSize()) + ": T" + str(current_task) + "J" + str(current_job))
-
+                        self._slots.append([slot_start,slot_end])
                 prev_task, prev_job = current_task, current_job
 
                 # print deadline _misses

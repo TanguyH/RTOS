@@ -51,7 +51,7 @@ class Generator:
         while (not valid_utilization):
             for i in range(self.getNbTasks()):
                 worst_cases.append(getRandValue(1, (periods[i]/10)//2))
-                gen_util = 0
+            gen_util = 0
 
             for i in range(self.getNbTasks()):  # Check processor utilization
                 gen_util += worst_cases[i] / periods[i]
