@@ -15,6 +15,7 @@ class ScheduleGraphic:
         ]
         self._fig = plt.figure(figsize=(10,7))
         self._ax = self._fig.add_subplot(111)   #I, J, and K integer : the subplot is the Ith plot on a grid with J rows and K columns
+        self._ax.set_title("Schedule")
         self._max_x = max_x
         self._max_y = (schedule.getNumberOfTasks()+1)*20
         self._schedule = schedule
