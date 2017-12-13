@@ -18,9 +18,6 @@ class Schedule:
     def getTasksFromTaskset(self):
         return self.getTaskSet().getTasks()
 
-    def getTasksFromOriginalTaskset(self):
-        return self.getTaskSet().getOriginalTasks()
-
     def setTaskSet(self, task_set):
         self._task_set = task_set
 
@@ -132,7 +129,7 @@ class Schedule:
             blocks_to_fit = -1
 
         while (blocks_to_fit > 0 and not done):
-            self.flagDeadlineMiss(dead_end_point-1, [task.getTaskNumber(), job])
+            #self.flagDeadlineMiss(dead_end_point-1, [task.getTaskNumber(), job])
             if(self.getDeadlineType() == "soft"):
                 blocks_to_fit = self.scheduleTask(task, job, time + self.getScheduleBlockSize(), blocks_to_fit)
 
@@ -169,29 +166,13 @@ class Schedule:
                 for task_time in priorities[lowest_priority]:
                     self.scheduleTask(task_time[0], task_time[1], task_time[2])
 
-            # code = good, but tasks not in system
-            #----------------------------------------------------------------------------------
-            # schedule established_lowest                                               # added
-            #if(established_lowest):
-            #    established_lowest = established_lowest[::-1]
-            #    for i in range(0, len(established_lowest)):
-            #        #print("scehduling " + str(established_lowest[i]))
-            #        for task_time in priorities[established_lowest[i]]:
-            #            #print("scehduling " + str(established_lowest[i]))
-            #            self.scheduleTask(task_time[0], task_time[1], task_time[2])
-            #^---------------------------------------------------------------------------------
-
-            #print("----- ----- -----")
-
     def scheduleDealine(self, task_job, time):
         block = time // self.getScheduleBlockSize()
         if(block < len(self.getDeadlines())) and (task_job[1] > 0):
             self.setDeadline(block, task_job)
 
     def checkForTaskRelease(self, time):
-        for task in self.getTasksFromTaskset():                                 # -- original taskset ?
-            #if(time % task.getPeriod() == 0): #and (time >= task.getOffset()):    # 0 was task.getOffset()
-            #if(time == task.getOffset()) or (time%task.getPeriod() == task.getOffset() and time > task.getOffset()):
+        for task in self.getTasksFromTaskset():
             if(time == task.getOffset()) or (((time - task.getOffset())%task.getPeriod()) == 0 and time > task.getOffset()):
                 task_job = task.releaseJob(time)
                 #print("time " + str(time) + "T"+str(task_job[0]) + "J" + str(task_job[1]))
@@ -199,9 +180,8 @@ class Schedule:
                 self.scheduleRelease(task_job, time)
                 self._schedule_queue.append((task, task_job[1], time))
 
-    def checkForTaskDeadline(self, time):                                       # -- original taskset ?
+    def checkForTaskDeadline(self, time):
         for task in self.getTasksFromTaskset():
-            #if(time % task.getDeadline() == 0) and (time >= task.getOffset()):  # 0 was task.getOffset()
             flag = task.getDeadline()
             if(task.getDeadline() == task.getPeriod()):
                 flag = 0
@@ -218,6 +198,27 @@ class Schedule:
             self._schedule_block = min_job_run
         self.clearTaskInformations()
 
+    def identifyMisses(self):
+        deadlines = self.getDeadlines()
+        schedule = self.getSchedule()
+
+        # deadline by deadline
+        for i in range(len(deadlines)):
+            for deadline in deadlines[i]:
+                task_no, job_no = deadline[0], deadline[1]
+                execution = 0
+                partial_schedule = schedule[:i]
+
+                # for slot in schedule untill now
+                for slot in partial_schedule:
+                    exec_task, exec_job = slot[0], slot[1]
+
+                    if(exec_task == task_no and exec_job == job_no):
+                        execution += self.getScheduleBlockSize()
+
+                if(execution < self.getTaskSet().getTaskByNumber(task_no).getWCET()):
+                    self.flagDeadlineMiss(i, [task_no, job_no])
+
     def buildSystem(self, start, end, lowest_priority=None, established_lowest=[]):
         block_check = gcdlist(self.getTaskSetWCET())                       # gcd all task lengths
         deadline_check = gcdlist(self.getTaskSetDeadlines())               # gcd all deadlines
@@ -233,6 +234,7 @@ class Schedule:
                 if(time != end):
                     self.checkForTaskRelease(time)
             self.assignTasksToSlots(lowest_priority, established_lowest)
+            self.identifyMisses()
 
     def simulate(self, start, end, lowest_priority=None):
 
@@ -278,7 +280,7 @@ class Schedule:
                     slot_end = slot+1
 
                     # case : end task or job
-                    if(next_task != current_task or next_job != current_job):
+                    if(next_task != current_task or next_job != current_job or slot == len(self.getSchedule())-1):
                         print(str(slot_start * self.getScheduleBlockSize()) + "-" + str(slot_end * self.getScheduleBlockSize()) + ": T" + str(current_task) + "J" + str(current_job))
 
                 prev_task, prev_job = current_task, current_job

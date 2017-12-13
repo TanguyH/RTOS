@@ -7,22 +7,7 @@ from generator import Generator
 
 def lowestPriorityViable(taskset, begin, end, task_number, established_priorities=[]):
     schedule = Schedule(taskset)
-
-
-    print("\nschedule pre-status : ")
-    print("shed : " + str(schedule.getSchedule()) + "\n")
-    print("releases : " + str(schedule.getRelease()) + "\n")
-    print("deadlines : " + str(schedule.getDeadlines()) + "\n")
-    print("misses : " + str(schedule.getMisses()) + "\n")
-
     schedule.buildSystem(begin, end, task_number, established_priorities)
-
-    print("\nschedule post-status : ")
-    print("shed : " + str(schedule.getSchedule()) + "\n")
-    print("releases : " + str(schedule.getRelease()) + "\n")
-    print("deadlines : " + str(schedule.getDeadlines()) + "\n")
-    print("misses : " + str(schedule.getMisses()) + "\n")
-
     task_misses = schedule.checkForMisses()
     return not task_misses
 
