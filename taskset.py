@@ -6,7 +6,6 @@ from additional import *
 class TaskSet:
     def __init__(self, source_file=None):
         self._tasks = []
-        self._original_tasks = []
         self._arrivals = []
         self._deadlines = []
         self._misses = []
@@ -22,8 +21,10 @@ class TaskSet:
             return self._tasks[i]
         return self._tasks
 
-    def getOriginalTasks(self):
-        return self._original_tasks
+    def getTaskByNumber(self, i):
+        for task in self.getTasks():
+            if(task.getTaskNumber() == i):
+                return task
 
     def removeTask(self, task):
         self.getTasks().remove(task)
