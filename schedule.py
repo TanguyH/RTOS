@@ -80,7 +80,7 @@ class Schedule:
         self._misses[i].append(task_job)
 
     def clearTaskInformations(self):
-        for task in self.getTasksFromTaskset():                                 #------ original ?
+        for task in self.getTasksFromTaskset():
             task.clearJobRealease()
 
     # not sure if working
@@ -129,7 +129,6 @@ class Schedule:
             blocks_to_fit = -1
 
         while (blocks_to_fit > 0 and not done):
-            #self.flagDeadlineMiss(dead_end_point-1, [task.getTaskNumber(), job])
             if(self.getDeadlineType() == "soft"):
                 blocks_to_fit = self.scheduleTask(task, job, time + self.getScheduleBlockSize(), blocks_to_fit)
 
@@ -175,8 +174,6 @@ class Schedule:
         for task in self.getTasksFromTaskset():
             if(time == task.getOffset()) or (((time - task.getOffset())%task.getPeriod()) == 0 and time > task.getOffset()):
                 task_job = task.releaseJob(time)
-                #print("time " + str(time) + "T"+str(task_job[0]) + "J" + str(task_job[1]))
-                #print("->" + str(task.getPeriod()) + " | " + str(task.getOffset()))
                 self.scheduleRelease(task_job, time)
                 self._schedule_queue.append((task, task_job[1], time))
 
