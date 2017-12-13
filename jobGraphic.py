@@ -40,7 +40,7 @@ class JobGraphic:
         ]
 
     def getText(self):
-        return "T"+self.getNbTask()+"J"+self.getNbJob()
+        return "T"+str(self.getNbTask())+"J"+str(self.getNbJob())
 
     def getTextPosition(self):
         x = 0

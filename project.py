@@ -4,6 +4,7 @@ from taskset import TaskSet
 from schedule import Schedule
 from InputVerifier import InputVerifier
 from generator import Generator
+from scheduleGraphic import ScheduleGraphic
 
 def lowestPriorityViable(taskset, begin, end, task_number, established_priorities=[]):
     schedule = Schedule(taskset)
@@ -25,7 +26,10 @@ def SIMAction(source_file, start, end):
         print(task.getWCET())
     schedule = Schedule(taskset)
     schedule.simulate(start, end)
-    
+    print(end)
+    graphic = ScheduleGraphic(int(end), schedule,taskset)
+    graphic.generateView()
+    #graphic.testRect()
 
 def Audsley(taskset, start, end, low_priorities = []):
     #viability = []

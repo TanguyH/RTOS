@@ -8,6 +8,8 @@ class Schedule:
         self._misses = []
         self._deadline_type = "soft"
         self._slots= []         #contains [slot_start TnJm, slot_end TnJm], ..
+        self._start_sim = 0
+        self._end_sim = 0
 
         self._schedule = []
         self._schedule_block = 0
@@ -70,6 +72,9 @@ class Schedule:
 
     def getSlots(self):
         return self._slots
+
+    def getEndSim(self):
+        return self._end_sim
 
     def setDeadline(self, i, task_job):
         self._deadlines[i].append(task_job)
@@ -240,8 +245,10 @@ class Schedule:
     def simulate(self, start, end, lowest_priority=None):
 
         print("Schedule from: " + start + " to: " + end + " ; " + str(self.getNumberOfTasks()) + " tasks")
-        start, end = int(start), int(end)
 
+        start, end = int(start), int(end)
+        self._start_sim = start
+        self._end_sim = end
         self.buildSystem(start, end, lowest_priority)
 
         slot_start, slot_end = 0, 0
