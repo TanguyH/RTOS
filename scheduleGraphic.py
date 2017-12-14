@@ -15,14 +15,26 @@ class ScheduleGraphic:
         ]
         self._fig = plt.figure(figsize=(10,7))
         self._ax = self._fig.add_subplot(111)   #I, J, and K integer : the subplot is the Ith plot on a grid with J rows and K columns
-        self._ax.set_title("Schedule")
+
         self._max_x = max_x
         self._max_y = (schedule.getNumberOfTasks()+1)*20
         self._schedule = schedule
+        self._taskset = taskset
+        self.setAxProperties()
 
+
+
+    def setAxProperties(self):
+        self._ax.set_title("Schedule")
         self._ax.set_xlim(0, self._max_x)
         self._ax.set_ylim(0, self._max_y)
-        self._taskset = taskset
+        tasks_y_labels = []
+        for task in self._taskset.getTasks():
+            tasks_y_labels.append("T"+str(task.getTaskNumber()))
+        tasks_y_labels.append("")
+        tasks_y_labels.reverse()
+        self._ax.set_yticklabels(tasks_y_labels)
+
 
     def getMaxX(self):
         return self._max_x
@@ -32,6 +44,9 @@ class ScheduleGraphic:
 
     def getCurrentTop(self,i):
         return self.getMaxY()-i*20
+
+    def getCurrentBottom(self,i):
+        return self.getMaxY()-i*40
 
     def addRectangle(self, job_rectangle):
         path = Path(job_rectangle.getVertices(), self._codes)
@@ -53,12 +68,6 @@ class ScheduleGraphic:
 
             nb_task = self._schedule.getSchedule()[index_schedule][0]
             nb_job = self._schedule.getSchedule()[index_schedule][1]
-
-            print("Task : "+str(nb_task))
-            print("Job : "+str(nb_job))
-            print("Top rectangle = "+str(self.getCurrentTop(nb_task)))
-            print("slot index : "+str(i))
-            print("schedule index : "+str(index_schedule))
             job_rectangle = JobGraphic(start_slot*10,end_slot*10,nb_task,nb_job,self.getCurrentTop(nb_task))
             self.addRectangle(job_rectangle)
             index_schedule += end_slot - start_slot
@@ -82,21 +91,22 @@ class ScheduleGraphic:
     def addDeadLinesView(self):
 
         for task in self._taskset.getTasks():
-            for i in range (0,self._max_x+1,task.getDeadline()):
+            for i in range (task.getDeadline(),self._max_x+1,task.getDeadline()):
                 y = self.getCurrentTop(task.getTaskNumber())
                 circle = plt.Circle((i, y),2, color="black",clip_on=False,fill=False)
                 self._ax.add_artist(circle)
 
-    def generateView(self):
-        current_task = self._schedule.getSchedule()[0][0]
-        print("block size : "+str(self._schedule.getScheduleBlockSize()))
-        print("len slots : "+str(len(self._schedule.getSlots())))
-        print("len schedule : "+str(len(self._schedule.getSchedule())))
-        print("schedule list : " + str(self._schedule.getSchedule()))
-        print("slots list : " + str(self._schedule.getSlots()))
+    def addReleasesView(self):
+        for task in self._taskset.getTasks():
+            for i in range (task.getOffset(), self._max_x+1, task.getPeriod()):
+                y = self.getCurrentTop(task.getTaskNumber())
+                head_length = 5
+                self._ax.arrow(i, y+20, 0, -20+head_length,head_width=5, head_length=head_length,color="black",clip_on=False)
 
+    def generateView(self):
         self.addSlots()
         self.addBlocksView()
         self.addDeadLinesView()
+        self.addReleasesView()
         plt.show()
 

@@ -1,0 +1,43 @@
+2 classes :
+
+1) JobGraphic :
+    contient les informations d'un job (arrival, deadline, nb_task, nb_job), ainsi que la hauteur(y)
+    du côté supérieur du rectangle (top_rect)
+
+    Méthodes :
+        setVertices(self) : contient des points, qui associés à self._code de la classe ScheduleGraphic, forment les contours
+                            du rectangle.
+                            /!\ On met deux fois le point "d'entrée" (là où on commence à tracer le rectangle), pour refermer ce rectangle
+
+        getText(self): retourne TmJn, pas bien compliqué
+
+        getTextPosition(self): Calcule le point situé centre exact du rectangle, et le retourne, pour l'affichage du texte
+
+2) ScheduleGraphic:
+    Contient self._codes qui correspond aux mouvements faits pour créer les rectangle de job (en fonction de leur 'vertices')
+        ->  Path.MOVETO = là où on commence.
+        ->  Path.LINETO = trace une ligne jusque.. (point du 'vertices')
+        ->  Path.CLOSEPOLY = ferme la forme au point donné
+        /!\ Les codes et les vertices sont dont listes différentes dont les éléments correspondent via leur indice.
+
+    Contient la fenêtre en elle-même (self._fig), le graphique dans cette figure (self._ax), les valeurs max des deux axes X et Y,
+    le schedule (après la simulation) et le taskset
+
+    Méthodes :
+        setAxProperties(self): configure l'axe comme il faut (maximum valeurs x et y, titre, remplace les valeurs de l'axe y par des "T1", "T2",..
+
+        addRectangle(self, job_rectangle): Va créer le rectangle en fonction des 'vertices' du job_rectangle et de self._codes
+                                            Et ajoute le texte de ce job_rectangle au milieu du rectangle, en étant bien centré
+
+        addSlots(self): récupère les slots durant lesquels les tasks ont droit au processeur pour leur job,
+                        crée un objet JobGraphic et appelle la méthode addRectangle(job_rectangle créé)
+
+        addBlocksView(self): récupère les schedule.getBlocksSize() pour afficher les lignes partout sur le graphique
+                            /!\ doit donc créer de nouveau codes et vertices
+
+        addDeadLinesView(self): récupère la deadline de chaque task du taskset pour afficher un cercle dans le graphique à chaque multiple de cette deadline
+
+        addReleasesView(self): récupère la période de chaque task du taskset pour afficher une flèche dans la graphique à chaque multiple de cette période,
+                                avec un décalage correspondant à l'Offset de cette task
+
+        generateView(self): Appelle les 5 méthodes "add.." ci-dessus (l'ordre n'est pas important) et puis appelle la méthode .show() pour afficher le résultat
